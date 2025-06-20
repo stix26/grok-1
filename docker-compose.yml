@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  grok-1:
+    build: .
+    container_name: grok-1-app
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./checkpoints:/app/checkpoints:ro
+      - ./tokenizer.model:/app/tokenizer.model:ro
+    environment:
+      - PYTHONPATH=/app
+      - CUDA_VISIBLE_DEVICES=0
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import sys; sys.exit(0)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - grok-network
+
+  # Optional: Add a database service if needed for future features
+  # postgres:
+  #   image: postgres:15-alpine
+  #   container_name: grok-1-db
+  #   environment:
+  #     POSTGRES_DB: grok1
+  #     POSTGRES_USER: grok1_user
+  #     POSTGRES_PASSWORD: grok1_password
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   ports:
+  #     - "5432:5432"
+  #   networks:
+  #     - grok-network
+
+  # Optional: Add Redis for caching if needed
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: grok-1-redis
+  #   ports:
+  #     - "6379:6379"
+  #   networks:
+  #     - grok-network
+
+networks:
+  grok-network:
+    driver: bridge
+
+# volumes:
+#   postgres_data: 
